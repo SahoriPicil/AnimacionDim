@@ -1,0 +1,175 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Teclas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Dancing+Script:wght@400..700&family=Luckiest+Guy&family=Oswald:wght@700&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+    
+    <style>
+      body {
+        background-image: url(back.gif);
+
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px; /* separación entre elementos */
+        height: 100vh;
+        /*background: url("verde.png") no-repeat center center fixed; */
+        background-size: cover;
+        font-family: Arial, sans-serif;
+      }
+
+      canvas {
+        
+        border: 10px solid rgb(255, 255, 255);
+        
+      }
+
+      #canvas {
+        width: 950px;
+        height: 600px;
+      }
+
+      .instructions {
+        color: white;
+        width: 200px;
+        height: 570px;
+        background-color: rgba(222, 75, 255, 0.521);
+        border: 10px solid rgb(255, 255, 255);
+        padding: 15px;
+        font-size: 40px;
+        line-height: 1.5em;
+        font-family: 'Pixelify Sans', sans-serif;
+      }
+
+      .instructions h2 {
+        color: white;
+        text-align: center;
+        font-size: 27px;
+        
+        font-family: "luckiest guy", cursive;
+      }
+      .instructions h3 {
+        color: rgb(231, 206, 255);
+        text-align: center;
+        font-size: 20px;
+        margin-top: -1.5cm;
+        margin-bottom: 10px;
+        font-family: "Oswald", cursive;
+      }
+      .instructions p {
+        color: rgb(255, 255, 255);
+        
+        font-size: 30px;
+        margin-top: -0.5cm;
+        margin-bottom: 10px;
+        font-family: "Pixelify Sans";
+      }
+      
+      .instructions h4 {
+        color: rgb(231, 206, 255);
+        text-align: center;
+        font-size: 20px;
+        margin-top: 0.3cm;
+        line-height: 30px;
+        font-family: "Oswald", cursive;
+      }
+
+     
+    </style>
+  </head>
+  <body>
+
+    <!-- instrucciones izquierda -->
+    <div class="instructions">
+      <h2>Instrucciones</h2>
+      <h3>hazlo girar!!</h3>
+      <p>Q = 1</p>
+      <p>W = 2</p>
+      <p>E = 3</p>
+      <p>R = 4</p>
+      <p>T = 5</p>
+      <p>Y = 6</p>
+      <h4> Sigue el orden de las letras lo más rápido posible!!</h4>
+      
+    </div>
+
+    <!-- canvas principal -->
+    <canvas id="canvas" width="800" height="600"></canvas>
+
+    
+    <script>
+    const Keycode = {
+      Q: 1,
+      W: 2,
+      E: 3,
+      R: 4,
+      T: 5,
+      Y: 6,
+      
+
+      SPACE: 32
+    };
+
+    let canvas, context;
+    let currentKey = "Q"; // Imagen inicial
+    let images = {};
+    let colors = ["white", "red", "blue"];
+    let currentColorIndex = 0;
+
+    // Carga las imágenes
+    function loadImages() {
+      images["Q"] = new Image();
+      images["Q"].src = "1.png";
+      images["W"] = new Image();
+      images["W"].src = "2.png";
+      images["E"] = new Image();
+      images["E"].src = "3.png";
+      images["R"] = new Image();
+      images["R"].src = "4.png";
+      images["T"] = new Image();
+      images["T"].src = "5.png";
+      images["Y"] = new Image();
+      images["Y"].src = "6.png";
+    }
+
+    window.onload = function () {
+      canvas = document.getElementById("canvas");
+      context = canvas.getContext("2d");
+      loadImages();
+      gameLoop();
+    };
+
+    function draw() {
+      // Limpia el canvas y lo deja transparente
+      context.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Dibuja la imagen estática en el centro
+      let img = images[currentKey];
+      if (img && img.complete) {
+        context.drawImage(img, canvas.width / 2 - 800, canvas.height / 2 - 515, 1600, 1000);
+      }
+    }
+
+    function gameLoop() {
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    window.addEventListener('keydown', function(event) {
+      // Cambia color con SPACE
+      if (event.code === "Space") {
+        currentColorIndex = (currentColorIndex + 1) % colors.length;
+      }
+      // Cambia imagen con QWERTY
+      if (["KeyQ", "KeyW", "KeyE", "KeyR", "KeyT", "KeyY"].includes(event.code)) {
+        currentKey = event.code.replace("Key", "");
+
+      }
+    });
+    </script>
+  </body>
+</html>
