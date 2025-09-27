@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <style>
+        body{
+            text-align: left;
+            background-image: url("back.jpg");
+            background-size: cover;         /* La imagen cubre todo el área */
+            background-repeat: no-repeat;   /* No se repite */
+        }
+        aside{
+            margin-top: -0.5cm;
+            font-size: 30px;
+            color: white;
+            font-family: Helvetica,;
+            text-align: center;
+        }
+    </style>
+    <canvas id="canvas" width="630" height="600"></canvas>
+    <aside>¿A dónde quieres ver?</aside>
+    <script>
+        window.onload = function() {
+            var canvas = document.getElementById('canvas'),
+                context = canvas.getContext('2d'),
+                pupila = new Image(),
+                fondo = new Image(); // Imagen de fondo
+
+            // Captura la posición del mouse en el canvas
+            var mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+            canvas.addEventListener('mousemove', function(e) {
+                var rect = canvas.getBoundingClientRect();
+                mouse.x = e.clientX - rect.left;
+                mouse.y = e.clientY - rect.top;
+            });
+
+            // Espera a que ambas imágenes estén cargadas
+            let imagesLoaded = 0;
+            function checkLoaded() {
+                imagesLoaded++;
+                if (imagesLoaded === 2) {
+                    drawFrame();
+                }
+            }
+
+            pupila.onload = checkLoaded;
+            fondo.onload = checkLoaded;
+
+            function drawFrame () {
+                window.requestAnimationFrame(drawFrame);
+                context.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Dibuja el fondo
+                context.drawImage(fondo, 150, 200, 250, 250);
+
+                context.save();
+                var x = canvas.width / 2 - 40;
+                var y = canvas.height / 2 + 20;
+                context.translate(x, y);
+
+                var dx = mouse.x - x;
+                var dy = mouse.y - y;
+                var radianes = Math.atan2(dy, dx);
+                context.rotate(radianes);
+
+                // Dibuja la pupila centrada y escalada
+                context.drawImage(pupila, -40, -40, 130, 130);
+
+                context.restore();
+            }
+
+            pupila.src = "pupila.png";
+            fondo.src = "fondo.png"; // Cambia "fondo.png" por el nombre de tu imagen de fondo
+        };
+    </script>
+</body>
+</html>
