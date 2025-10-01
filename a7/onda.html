@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>onda</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background-color: black;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+    <canvas id="canvas" width="1920" height="1080"></canvas>
+    <script>
+      window.onload = function () {
+        var canvas = document.getElementById('canvas'),
+            context = canvas.getContext('2d');
+
+        // Crear objetos imagen
+        var carro = new Image();
+        var fondo = new Image();
+        var cieloPulso = new Image(); // nueva imagen que usaremos para el pulso de escala
+
+        // Posiciones
+        var carroX = -290;
+        var centerY = 60;
+        var range = 68;
+        var angle = 0;
+        
+ // Variables para movimiento
+        var xspeed = 1.8;       // velocidad en x
+        var yspeed = 0.05;   // velocidad de oscilación en y
+
+        // Parámetros de escala para el cielo/pulso
+        // Estos valores controlan la amplitud y la base de escala.
+        var centerScale = 1.0; // escala base (no cambiar)
+        var rangoEscala = 0.03; // rango de oscilación de escala (pulso)
+
+        // Cargar las imágenes
+        cieloPulso.src = "cielo.png"; // imagen que se escala (mantén el nombre o cambia a tu recurso)
+        fondo.src = "fondo.png";
+        carro.src = "car.png";
+
+        // Opcional: manejo de errores en carga
+        cieloPulso.onerror = function() {
+          console.error("Error cargando cielo.png. Verifica que la ruta sea correcta y que el archivo exista.");
+        };
+        fondo.onerror = function() {
+          console.error("Error cargando fondo.png. Verifica que la ruta sea correcta y que el archivo exista.");
+        };
+        carro.onerror = function() {
+          console.error("Error cargando car.png. Verifica que la ruta sea correcta y que el archivo exista.");
+        };
+
+        // Eventos de carga
+        var cargadas = { cielo: false, fondo: false, carro: false };
+
+        function intentarAnimar() {
+          if (cargadas.cielo && cargadas.fondo && cargadas.carro) {
+            animate();
+          }
+        }
+
+        cieloPulso.onload = function() {
+          cargadas.cielo = true;
+          intentarAnimar();
+        };
+        fondo.onload = function() {
+          cargadas.fondo = true;
+          intentarAnimar();
+        };
+        carro.onload = function() {
+          cargadas.carro = true;
+          intentarAnimar();
+        };
+
+        // Por si las imágenes ya están en cache
+        if (cieloPulso.complete) { cargadas.cielo = true; }
+        if (fondo.complete) { cargadas.fondo = true; }
+        if (carro.complete) { cargadas.carro = true; }
+        intentarAnimar();
+
+        function animate() {
+          window.requestAnimationFrame(animate);
+
+          context.drawImage(fondo, 0, 0, canvas.width-600, canvas.height-400);
+
+          var cieloScaleX = centerScale + Math.sin(angle) * rangoEscala;
+          var cieloScaleY = centerScale + Math.sin(angle) * rangoEscala;
+
+         
+          angle += yspeed;
+
+         
+          context.save();
+          
+          context.translate(canvas.width / 2, canvas.height / 2);
+          context.scale(cieloScaleX, cieloScaleY);
+          var cieloW = canvas.width;
+          var cieloH = canvas.height;
+          context.drawImage(cieloPulso,-1050, -cieloH +400, cieloW-550, cieloH-500);
+          context.restore();
+          carroX += xspeed + 0.9;
+          centerY += 0.65; 
+          var ypos = centerY + Math.sin(angle) * range;
+          context.drawImage(carro, carroX, ypos, 120, 108);
+
+          
+          if (carroX > canvas.width) {
+            carroX = -290; 
+            centerY = 60; 
+            angle = 0;    
+          }
+        }
+      };
+    </script>
+  </body>
+</html>
