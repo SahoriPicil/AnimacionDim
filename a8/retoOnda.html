@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>onda</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh; /* altura completa de la ventana */
+      display: flex; /* usa Flexbox */
+      justify-content: center; /* centra horizontalmente */
+      align-items: center; /* centra verticalmente */
+      overflow: hidden;
+      background-image: url('fondo.jpg');
+    }
+    canvas {
+      display: block; /* elimina espacios en línea */
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas" width="1000" height="500"></canvas>
+  <script>
+    window.onload = function () {
+      var canvas = document.getElementById('canvas'),
+          context = canvas.getContext('2d');
+
+      // Crear objetos imagen
+      var carro = new Image();
+      var fondo = new Image();
+
+      // Cargar las imágenes
+      fondo.src = "mesa.jpg";
+      carro.src = "pelota.png";
+
+      var cargadas = { fondo: false, carro: false };
+
+      function intentarAnimar() {
+        if (cargadas.fondo && cargadas.carro) {
+          animate();
+        }
+      }
+
+      fondo.onload = function() {
+        cargadas.fondo = true;
+        intentarAnimar();
+      };
+      carro.onload = function() {
+        cargadas.carro = true;
+        intentarAnimar();
+      };
+
+      if (fondo.complete) { cargadas.fondo = true; }
+      if (carro.complete) { cargadas.carro = true; }
+
+      function animate() {
+        window.requestAnimationFrame(animate);
+
+        // Dibujar fondo
+        context.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+
+        // Variables para movimiento
+        if (typeof animate.xPos === 'undefined') {
+          animate.xPos = 10; // posición inicial en X
+          animate.dirX = 1;  // dirección inicial en X
+        }
+
+        // Ajusta la velocidad en X
+        var xspeed = 3;
+        var carroWidth = 120;
+        var carroHeight = 108;
+
+        // Actualizar posición en X
+        animate.xPos += xspeed * animate.dirX;
+
+        // Rebotar en las esquinas
+        if (animate.xPos > canvas.width - carroWidth || animate.xPos < 0) {
+          animate.dirX *= -1; // invierte dirección
+        }
+
+        // Movimiento en Y: onda sinusoidal
+        if (typeof animate.angle === 'undefined') {
+          animate.angle = 0;
+        }
+        animate.angle += 0.05; // velocidad de la onda
+
+        var rangeY = 80; // amplitud de la onda en Y
+        var ypos = 250 + Math.sin(animate.angle) * rangeY; // ajusta la base en 250
+
+        // Dibujar el carro en la posición actual
+        context.drawImage(carro, animate.xPos, ypos, carroWidth, carroHeight);
+      }
+    };
+  </script>
+</body>
+</html>
