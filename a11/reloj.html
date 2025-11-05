@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Reloj</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body
+        {
+            text-align: center;
+            background-image: url("fondo.jpg"); /* reemplaza por tu imagen de fondo */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin: 0;
+            min-height: 100vh;
+        }
+        canvas { 
+            background-image: url("reloj.png"); /* imagen de fondo para el canvas */
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain; /* usa 'cover' si prefieres que rellene */
+            display: inline-block;
+            margin-top: 2rem;
+        }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="600" height="600"></canvas>
+
+    <script src="utils.js"></script>
+    <script src="./classes/arrow.js"></script>
+    <script>
+    (function () {
+      var canvas = document.getElementById('canvas'),
+          context = canvas.getContext('2d');
+
+      var images = {
+        hora: new Image(),
+        min: new Image(),
+        seg: new Image(),      // nueva manecilla lenta
+        estrella: new Image()
+      };
+      var toLoad = 4;
+      function onImgLoad() { if (--toLoad === 0) start(); }
+      images.hora.onload = onImgLoad;
+      images.min.onload = onImgLoad;
+      images.seg.onload = onImgLoad;
+      images.estrella.onload = onImgLoad;
+
+      images.hora.src = "1.png";
+      images.min.src = "2.png";
+      images.seg.src = "3.png";     // nombre de archivo de la nueva manecilla
+      images.estrella.src = "estrella.png";
+
+      var horaVr = 2,    // grados por frame para la hora
+          minVr = 1,     // grados por frame para el minutero
+          segVr = 0.2,   // grados por frame para la nueva manecilla (mucho más lenta)
+          radianesHora = 0,
+          radianesMin = 0,
+          radianesSeg = 0,
+          baseScale = 0.8, // escala base (80%)
+          depthFactor = 0.25, // cuanto cambia la escala por ángulo vertical
+          sideFactor = 0.18; // factor extra para achicar cuando apunta a la derecha (3 y 4)
+
+      function start() {
+        requestAnimationFrame(drawFrame);
+      }
+
+      function scalesForAngle(angle) {
+        var sinA = Math.sin(angle);
+        var cosA = Math.cos(angle);
+        var verticalShrink = depthFactor * Math.abs(sinA);
+        var rightSideShrink = sideFactor * Math.max(0, cosA);
+        var scaleX = baseScale;
+        var scaleY = baseScale * (1 - verticalShrink - rightSideShrink);
+        scaleY = Math.max(0.25, scaleY);
+        return { sx: scaleX, sy: scaleY };
+      }
+
+      function drawFrame() {
+        requestAnimationFrame(drawFrame);
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        // hora
+        context.save();
+        context.translate(300, 300);
+        radianesHora += horaVr * Math.PI / 180;
+        context.rotate(radianesHora);
+        var sHora = scalesForAngle(radianesHora);
+        var horaW = images.hora.width * sHora.sx;
+        var horaH = images.hora.height * sHora.sy;
+        context.drawImage(images.hora, -horaW/2, -horaH/2, horaW, horaH);
+        context.restore();
+
+        // minuto
+        context.save();
+        context.translate(300, 300);
+        radianesMin += minVr * Math.PI / 180;
+        context.rotate(radianesMin);
+        var sMin = scalesForAngle(radianesMin);
+        var minW = images.min.width * sMin.sx;
+        var minH = images.min.height * sMin.sy;
+        context.drawImage(images.min, -minW/2, -minH/2, minW, minH);
+        context.restore();
+
+        // nueva manecilla lenta (seg)
+        context.save();
+        context.translate(300, 300);
+        radianesSeg += segVr * Math.PI / 180;
+        context.rotate(radianesSeg);
+        var sSeg = scalesForAngle(radianesSeg);
+        // puedes ajustar la longitud relativa de esta manecilla multiplicando por un factor
+        var segLengthFactor = 1.05;
+        var segW = images.seg.width * sSeg.sx * segLengthFactor;
+        var segH = images.seg.height * sSeg.sy * segLengthFactor;
+        context.drawImage(images.seg, -segW/2, -segH/2, segW, segH);
+        context.restore();
+
+        // estrella fija encima, centrada
+        if (images.estrella.complete) {
+          context.drawImage(images.estrella, 300 - images.estrella.width/2, 300 - images.estrella.height/2);
+        }
+      }
+    }());
+    </script>
+  </body>
+</html>
