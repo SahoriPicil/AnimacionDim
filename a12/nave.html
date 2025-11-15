@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Nave personalizada</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+          body {
+        background-color: rgb(0, 0, 0);
+        text-align: center;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        }
+        #canvas {
+        background-image: url("cielo.jpg");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+      aside {
+        position: absolute;
+        top: 30px;
+        left: 30px;
+        color: white;
+        font-family: sans-serif;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="1240" height="630"></canvas>
+    <aside>Press left and right arrow keys to rotate ship, up to add thrust.</aside>
+
+    <script src="utils.js"></script>
+    <script src="./classes/ship.js"></script> 
+         <script>
+    window.onload = function () {
+      var canvas = document.getElementById('canvas'),
+          context = canvas.getContext('2d'),
+          naveImg = new Image(),
+          fuegoImg = new Image(),
+          x = canvas.width / 2,
+          y = canvas.height / 2,
+          rotation = 0,
+          vr = 0,
+          vx = 0,
+          vy = 0,
+          thrust = 0,
+          friction = 0.97,
+          width = 80,
+          height = 100,
+          fuegoWidth = 100,
+          fuegoHeight = 100;
+          acomodar=-40;
+
+      naveImg.src = "nave.png";
+      fuegoImg.src = "fuego.png";
+
+      window.addEventListener('keydown', function (event) {
+        switch (event.keyCode) {
+        case 37:      //left
+          vr = -3;
+          break;
+        case 39:      //right
+          vr = 3;
+          break;
+        case 38:      //up
+          thrust = 0.05;
+          break;
+        }
+      }, false);
+
+      window.addEventListener('keyup', function () {
+        vr = 0;
+        thrust = 0;
+      }, false);
+
+      (function drawFrame () {
+        window.requestAnimationFrame(drawFrame, canvas);
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        rotation += vr * Math.PI / 180;
+        var angle = rotation,
+            ax = Math.cos(angle) * thrust,
+            ay = Math.sin(angle) * thrust,
+            left = 0,
+            right = canvas.width,
+            top = 0,
+            bottom = canvas.height;
+
+        vx += ax;
+        vy += ay;
+        vx *= friction;
+        vy *= friction;
+        x += vx;
+        y += vy;
+
+         //screen wrapping - limites del canvas
+        if (x - width / 2 < left) {
+          x = left + width / 2;
+          vx = 0;
+        } else if (x + width / 2 > right) {
+          x = right - width / 2;
+          vx = 0;
+        }
+        if (y - height / 2  < top) {
+          y = top + height / 2;
+          vy = 0;
+        } else if (y + height / 2 > bottom) {
+          y = bottom - height / 2;
+          vy = 0;
+        }
+
+        // dibujar fuego detrás si hay thrust
+        if (thrust > 0 && fuegoImg.complete) {
+          context.save();
+          context.translate(x, y);
+          context.rotate(rotation);
+          context.translate(acomodar, height / 2 + fuegoHeight / 2- 110);
+          context.drawImage(fuegoImg, -fuegoWidth / 2, -fuegoHeight / 2, fuegoWidth, fuegoHeight);
+          context.restore();
+        }
+
+        // dibujar la nave
+        context.save();
+        context.translate(x, y);
+        context.rotate(rotation);
+        context.drawImage(naveImg, -width / 2, -height / 2, width, height);
+        context.restore();
+      }());
+    };
+    </script>
+
+  </body>
+</html>
